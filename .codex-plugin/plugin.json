@@ -21,9 +21,9 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Generate an image through RootFlowAI with my prompt and save it locally.",
-      "Edit an existing portrait through RootFlowAI and write the output files to my workspace.",
-      "Create or revise a RootFlowAI image and keep the raw API response for debugging."
+      "Use $rootflowai-image-metered to generate or edit images through the standard billing lane.",
+      "Use $rootflowai-image-count to generate or edit images through the count-billed lane.",
+      "Use the RootFlowAI image skills and keep the raw API response for debugging."
     ],
     "brandColor": "#D96B3B",
     "screenshots": []

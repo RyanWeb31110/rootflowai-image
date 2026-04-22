@@ -1,6 +1,0 @@
-interface:
-  display_name: "RootFlowAI Image"
-  short_description: "Generate images through RootFlowAI"
-  default_prompt: "Use $rootflowai-image to generate images through the RootFlowAI images API and save them locally."
-policy:
-  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "RootFlowAI Image Metered"
+  short_description: "Use RootFlowAI with metered billing"
+  default_prompt: "Use $rootflowai-image-metered to generate or edit images through the metered RootFlowAI workflow."
+policy:
+  allow_implicit_invocation: true
