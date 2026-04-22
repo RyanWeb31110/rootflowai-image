@@ -17,26 +17,28 @@ It should prefer the `gpt-image-2-count` model and the count credential profile 
 3. Use `edit_image.py` for image editing work.
 4. Pass `--profile count` so the billing route stays explicit.
 5. Prefer `gpt-image-2-count` as the model.
+6. If you are using an installed skill bundle, use the bundled `scripts/` directory inside the skill.
+7. If you are reading the source repository directly, the canonical scripts live in `../../scripts/`.
 
 Example:
 
 ```bash
 ROOTFLOWAI_COUNT_API_KEY=your_count_key_here \
-python3 /absolute/path/to/rootflowai-image/scripts/generate_image.py \
+python3 scripts/generate_image.py \
   --profile count \
   --model gpt-image-2-count \
   --prompt "Three oath brothers doing a short-video livestream" \
-  --output-dir /absolute/path/to/output/rootflowai-images
+  --output-dir ./out
 ```
 
 ```bash
 ROOTFLOWAI_COUNT_API_KEY=your_count_key_here \
-python3 /absolute/path/to/rootflowai-image/scripts/edit_image.py \
+python3 scripts/edit_image.py \
   --profile count \
   --model gpt-image-2-count \
   --image /absolute/path/to/portrait.jpg \
   --prompt "Convert this portrait into an American-style professional headshot" \
-  --output-dir /absolute/path/to/output/rootflowai-edits
+  --output-dir ./out
 ```
 
 ## Defaults
@@ -50,13 +52,15 @@ python3 /absolute/path/to/rootflowai-image/scripts/edit_image.py \
 
 ## Workflow
 
-- Prefer `../../scripts/generate_image.py --profile count --model gpt-image-2-count` for prompt-to-image requests.
-- Prefer `../../scripts/edit_image.py --profile count --model gpt-image-2-count` for image editing requests.
+- Prefer `scripts/generate_image.py --profile count --model gpt-image-2-count` for packaged skill installs.
+- Prefer `scripts/edit_image.py --profile count --model gpt-image-2-count` for packaged skill installs.
+- When operating directly inside this source repository, use the canonical scripts from `../../scripts/`.
 - Keep the model on `gpt-image-2-count` unless the user explicitly asks for another model.
 - Always pass `--output-dir` unless the user explicitly wants files in the current directory.
 - Use `--response-path` when the user wants the raw API payload preserved for debugging.
 - Use `--mask` when the user wants a localized edit and already has a mask image.
 - Read the script JSON output and surface `profile_resolved` plus `api_key_source` when billing-path clarity matters.
+- Release ZIPs for Codex Skill, Cherry Studio, and Claude-compatible skill hosts copy the canonical scripts into `scripts/` so each installed bundle is self-contained.
 
 ## Reference
 

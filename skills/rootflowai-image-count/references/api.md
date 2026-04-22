@@ -17,22 +17,22 @@ export ROOTFLOWAI_COUNT_API_KEY='your_count_key_here'
 ## Generate
 
 ```bash
-python3 /absolute/path/to/rootflowai-image/scripts/generate_image.py \
+python3 scripts/generate_image.py \
   --profile count \
   --model gpt-image-2-count \
   --prompt "Three oath brothers doing a short-video livestream" \
-  --output-dir /absolute/path/to/output
+  --output-dir ./out
 ```
 
 ## Edit
 
 ```bash
-python3 /absolute/path/to/rootflowai-image/scripts/edit_image.py \
+python3 scripts/edit_image.py \
   --profile count \
   --model gpt-image-2-count \
   --image /absolute/path/to/portrait.jpg \
   --prompt "Convert this portrait into an American-style professional headshot" \
-  --output-dir /absolute/path/to/output
+  --output-dir ./out
 ```
 
 ## Defaults
@@ -47,3 +47,4 @@ python3 /absolute/path/to/rootflowai-image/scripts/edit_image.py \
 
 - `--api-key` overrides env-based profile resolution.
 - Script output includes `profile_requested`, `profile_resolved`, and `api_key_source`.
+- Installed skill ZIPs bundle the runtime scripts in `scripts/`; the source repository keeps the canonical runtime files in the top-level `scripts/` directory.
