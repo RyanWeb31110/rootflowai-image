@@ -18,7 +18,7 @@ export ROOTFLOWAI_METERED_API_KEY='your_metered_key_here'
 ## Generate
 
 ```bash
-python3 scripts/generate_image.py \
+python3 ../../scripts/generate_image.py \
   --profile metered \
   --prompt "Three oath brothers doing a short-video livestream" \
   --output-dir ./out
@@ -27,7 +27,7 @@ python3 scripts/generate_image.py \
 ## Edit
 
 ```bash
-python3 scripts/edit_image.py \
+python3 ../../scripts/edit_image.py \
   --profile metered \
   --image /absolute/path/to/portrait.jpg \
   --prompt "Convert this portrait into an American-style professional headshot" \
@@ -46,4 +46,4 @@ python3 scripts/edit_image.py \
 
 - `--api-key` overrides env-based profile resolution.
 - Script output includes `profile_requested`, `profile_resolved`, and `api_key_source`.
-- Installed skill ZIPs bundle the runtime scripts in `scripts/`; the source repository keeps the canonical runtime files in the top-level `scripts/` directory.
+- Installed skill ZIPs bundle the runtime scripts inside the skill; the source repository and plugin layout keep the canonical runtime files in the top-level `scripts/` directory.

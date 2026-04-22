@@ -18,15 +18,31 @@ SPEC.loader.exec_module(build_release_packages)
 
 
 class BuildReleasePackagesTests(unittest.TestCase):
-    def test_rewrite_for_standalone_bundle_rewrites_repo_paths(self) -> None:
+    def test_rewrite_script_paths_rewrites_repo_paths(self) -> None:
         source = (
             "Use `../../scripts/generate_image.py`.\n"
-            "python3 /absolute/path/to/rootflowai-image/scripts/edit_image.py\n"
+            "python3 ../../scripts/edit_image.py\n"
         )
-        rewritten = build_release_packages.rewrite_for_standalone_bundle(source)
+        rewritten = build_release_packages.rewrite_script_paths(source, "scripts/")
         self.assertIn("`scripts/generate_image.py`", rewritten)
         self.assertIn("python3 scripts/edit_image.py", rewritten)
         self.assertNotIn("../../scripts/", rewritten)
+
+    def test_openclaw_frontmatter_includes_primary_env_metadata(self) -> None:
+        source = (
+            "---\n"
+            "name: rootflowai-image-metered\n"
+            "description: demo\n"
+            "---\n"
+            "\n"
+            "Body\n"
+        )
+        rewritten = build_release_packages.inject_openclaw_frontmatter(
+            source,
+            "ROOTFLOWAI_METERED_API_KEY",
+        )
+        self.assertIn("homepage: https://github.com/RyanWeb31110/rootflowai-image", rewritten)
+        self.assertIn('"primaryEnv":"ROOTFLOWAI_METERED_API_KEY"', rewritten)
 
     def test_cherry_studio_bundle_is_self_contained_without_agents(self) -> None:
         target = next(spec for spec in build_release_packages.TARGET_SPECS if spec.name == "cherry-studio")
@@ -52,6 +68,18 @@ class BuildReleasePackagesTests(unittest.TestCase):
             bundle_dir = output_dir / "codex-skill" / "rootflowai-image-count"
             self.assertTrue((bundle_dir / "agents" / "openai.yaml").is_file())
             self.assertTrue((bundle_dir / "scripts" / "edit_image.py").is_file())
+
+    def test_openclaw_bundle_uses_base_dir_and_no_agents(self) -> None:
+        target = next(spec for spec in build_release_packages.TARGET_SPECS if spec.name == "openclaw")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_dir = Path(temp_dir)
+            build_release_packages.build_skill_target(output_dir, target)
+
+            bundle_dir = output_dir / "openclaw" / "rootflowai-image-metered"
+            content = (bundle_dir / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("{baseDir}/scripts/generate_image.py", content)
+            self.assertIn('"primaryEnv":"ROOTFLOWAI_METERED_API_KEY"', content)
+            self.assertFalse((bundle_dir / "agents").exists())
 
 
 if __name__ == "__main__":

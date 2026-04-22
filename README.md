@@ -52,6 +52,7 @@ The repository now supports one source tree with multiple installable package ta
 - `codex-plugin`: full Codex plugin ZIP with `.codex-plugin/`, `skills/`, and root scripts
 - `codex-skill`: standalone self-contained skill ZIPs for Codex skill import flows
 - `cherry-studio`: standalone self-contained skill ZIPs for Cherry Studio "Install from ZIP"
+- `openclaw`: standalone self-contained skill ZIPs for OpenClaw shared or workspace skill folders
 - `claude-compatible`: standalone self-contained skill ZIPs for `.claude/skills` based hosts
 
 ## GitHub Releases
@@ -79,6 +80,7 @@ Recommended assets for end users:
 - Cherry Studio: `rootflowai-image-*-cherry-studio.zip`
 - Codex Skill import: `rootflowai-image-*-codex-skill.zip`
 - Codex Plugin import: `rootflowai-image-codex-plugin.zip`
+- OpenClaw: `rootflowai-image-*-openclaw.zip`
 - Claude-compatible hosts: `rootflowai-image-*-claude-compatible.zip`
 
 Build all packages locally:
@@ -94,6 +96,8 @@ Generated artifacts:
 - `dist/codex-skill/rootflowai-image-count-codex-skill.zip`
 - `dist/cherry-studio/rootflowai-image-metered-cherry-studio.zip`
 - `dist/cherry-studio/rootflowai-image-count-cherry-studio.zip`
+- `dist/openclaw/rootflowai-image-metered-openclaw.zip`
+- `dist/openclaw/rootflowai-image-count-openclaw.zip`
 - `dist/claude-compatible/rootflowai-image-metered-claude-compatible.zip`
 - `dist/claude-compatible/rootflowai-image-count-claude-compatible.zip`
 
@@ -134,6 +138,17 @@ Open Cherry Studio `Skills`, choose `Install from ZIP file`, and select one of:
 - `dist/cherry-studio/rootflowai-image-count-cherry-studio.zip`
 
 If you prefer `Install from directory`, select the matching expanded folder under `dist/cherry-studio/`.
+
+### OpenClaw
+
+Download one of the ZIPs in `dist/openclaw/`, extract it, and place the resulting skill folder in one of the locations OpenClaw watches:
+
+- `~/.openclaw/skills`
+- `<workspace>/skills`
+- `~/.agents/skills`
+- `<workspace>/.agents/skills`
+
+The OpenClaw package rewrites script paths to use `{baseDir}` and includes `metadata.openclaw.primaryEnv` so OpenClaw config can inject the right API key for each billing lane.
 
 ### Claude-Compatible Hosts
 

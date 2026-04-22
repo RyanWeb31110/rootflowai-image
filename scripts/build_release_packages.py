@@ -34,6 +34,8 @@ class TargetSpec:
     name: str
     include_agents: bool
     package_kind: str
+    script_prefix: str
+    inject_openclaw_metadata: bool = False
 
 
 SKILL_SPECS = (
@@ -42,10 +44,17 @@ SKILL_SPECS = (
 )
 
 TARGET_SPECS = (
-    TargetSpec("codex-skill", include_agents=True, package_kind="skill"),
-    TargetSpec("cherry-studio", include_agents=False, package_kind="skill"),
-    TargetSpec("claude-compatible", include_agents=False, package_kind="skill"),
-    TargetSpec("codex-plugin", include_agents=True, package_kind="plugin"),
+    TargetSpec("codex-skill", include_agents=True, package_kind="skill", script_prefix="scripts/"),
+    TargetSpec("cherry-studio", include_agents=False, package_kind="skill", script_prefix="scripts/"),
+    TargetSpec("claude-compatible", include_agents=False, package_kind="skill", script_prefix="scripts/"),
+    TargetSpec(
+        "openclaw",
+        include_agents=False,
+        package_kind="skill",
+        script_prefix="{baseDir}/scripts/",
+        inject_openclaw_metadata=True,
+    ),
+    TargetSpec("codex-plugin", include_agents=True, package_kind="plugin", script_prefix="../../scripts/"),
 )
 
 
@@ -64,15 +73,45 @@ def copy_file(source: Path, destination: Path) -> None:
     shutil.copy2(source, destination)
 
 
-def rewrite_for_standalone_bundle(text: str) -> str:
+def rewrite_script_paths(text: str, script_prefix: str) -> str:
     replacements = {
-        "python3 /absolute/path/to/rootflowai-image/scripts/": "python3 scripts/",
-        "`../../scripts/": "`scripts/",
-        " `../../scripts/": " `scripts/",
+        "python3 /absolute/path/to/rootflowai-image/scripts/": f"python3 {script_prefix}",
+        "python3 ../../scripts/": f"python3 {script_prefix}",
+        "python3 scripts/": f"python3 {script_prefix}",
+        "`../../scripts/": f"`{script_prefix}",
+        "`scripts/": f"`{script_prefix}",
     }
     for original, replacement in replacements.items():
         text = text.replace(original, replacement)
     return text
+
+
+def inject_openclaw_frontmatter(text: str, primary_env: str) -> str:
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return text
+
+    end_index = None
+    for index in range(1, len(lines)):
+        if lines[index].strip() == "---":
+            end_index = index
+            break
+
+    if end_index is None:
+        return text
+
+    frontmatter = lines[1:end_index]
+    if not any(line.startswith("homepage:") for line in frontmatter):
+        frontmatter.append("homepage: https://github.com/RyanWeb31110/rootflowai-image")
+    if not any(line.startswith("metadata:") for line in frontmatter):
+        frontmatter.append(
+            'metadata: {"openclaw":{"homepage":"https://github.com/RyanWeb31110/rootflowai-image","primaryEnv":"'
+            + primary_env
+            + '"}}'
+        )
+
+    rebuilt = ["---", *frontmatter, "---", *lines[end_index + 1 :]]
+    return "\n".join(rebuilt) + ("\n" if text.endswith("\n") else "")
 
 
 def copy_runtime_scripts(destination_dir: Path) -> None:
@@ -81,20 +120,27 @@ def copy_runtime_scripts(destination_dir: Path) -> None:
         copy_file(SCRIPTS_ROOT / script_name, destination_dir / script_name)
 
 
-def copy_skill_bundle(target_dir: Path, skill: SkillSpec, include_agents: bool) -> None:
+def copy_skill_bundle(target_dir: Path, skill: SkillSpec, target: TargetSpec) -> None:
     target_dir.mkdir(parents=True, exist_ok=True)
     copy_file(skill.source_dir / "SKILL.md", target_dir / "SKILL.md")
     copy_file(skill.source_dir / "references" / "api.md", target_dir / "references" / "api.md")
 
-    if include_agents and (skill.source_dir / "agents").is_dir():
+    if target.include_agents and (skill.source_dir / "agents").is_dir():
         shutil.copytree(skill.source_dir / "agents", target_dir / "agents", dirs_exist_ok=True, ignore=COPY_IGNORE)
 
     copy_runtime_scripts(target_dir / "scripts")
 
-    skill_md = rewrite_for_standalone_bundle((target_dir / "SKILL.md").read_text(encoding="utf-8"))
+    skill_md = rewrite_script_paths((target_dir / "SKILL.md").read_text(encoding="utf-8"), target.script_prefix)
+    if target.inject_openclaw_metadata:
+        primary_env = (
+            "ROOTFLOWAI_COUNT_API_KEY"
+            if skill.name.endswith("-count")
+            else "ROOTFLOWAI_METERED_API_KEY"
+        )
+        skill_md = inject_openclaw_frontmatter(skill_md, primary_env)
     (target_dir / "SKILL.md").write_text(skill_md, encoding="utf-8")
 
-    api_md = rewrite_for_standalone_bundle((target_dir / "references" / "api.md").read_text(encoding="utf-8"))
+    api_md = rewrite_script_paths((target_dir / "references" / "api.md").read_text(encoding="utf-8"), target.script_prefix)
     (target_dir / "references" / "api.md").write_text(api_md, encoding="utf-8")
 
 
@@ -107,7 +153,7 @@ def build_skill_target(output_dir: Path, target: TargetSpec) -> list[dict[str, s
         expanded_dir = target_root / skill.name
         if expanded_dir.exists():
             shutil.rmtree(expanded_dir)
-        copy_skill_bundle(expanded_dir, skill, include_agents=target.include_agents)
+        copy_skill_bundle(expanded_dir, skill, target=target)
 
         zip_base = target_root / f"{skill.name}-{target.name}"
         archive_path = shutil.make_archive(str(zip_base), "zip", root_dir=target_root, base_dir=skill.name)
