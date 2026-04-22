@@ -39,7 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--api-key",
-        help="Bearer token. Defaults to the ROOTFLOWAI_API_KEY environment variable.",
+        help="Bearer token. Overrides profile-based environment variable resolution.",
     )
     parser.add_argument(
         "--base-url",

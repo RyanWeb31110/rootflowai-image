@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import base64
+import ipaddress
 import json
 import mimetypes
 import os
+import socket
 import sys
 import uuid
 from pathlib import Path
@@ -37,10 +39,59 @@ PROFILE_ENV_VARS = {
     PROFILE_METERED: ("ROOTFLOWAI_METERED_API_KEY", "ROOTFLOWAI_API_KEY"),
     PROFILE_COUNT: ("ROOTFLOWAI_COUNT_API_KEY",),
 }
+ALLOWED_REMOTE_IMAGE_SCHEME = "https"
+BLOCKED_HOSTNAMES = {"localhost", "localhost.localdomain"}
 
 
 def normalize_base_url(base_url: str) -> str:
     return base_url.rstrip("/")
+
+
+def _extract_ip_from_sockaddr(sockaddr: tuple[Any, ...]) -> str:
+    if not sockaddr:
+        raise ValueError("Resolver returned an empty socket address.")
+    return str(sockaddr[0])
+
+
+def validate_remote_image_url(
+    url: str,
+    resolver: Any | None = None,
+) -> None:
+    parsed = parse.urlparse(url)
+    if parsed.scheme.lower() != ALLOWED_REMOTE_IMAGE_SCHEME:
+        raise ValueError("Only HTTPS image URLs are allowed.")
+
+    hostname = parsed.hostname
+    if not hostname:
+        raise ValueError("Remote image URL must include a hostname.")
+
+    normalized_hostname = hostname.rstrip(".").lower()
+    if normalized_hostname in BLOCKED_HOSTNAMES:
+        raise ValueError("Localhost image URLs are not allowed.")
+
+    port = parsed.port or 443
+    resolve = resolver or socket.getaddrinfo
+
+    try:
+        infos = resolve(hostname, port, type=socket.SOCK_STREAM)
+    except socket.gaierror as exc:
+        raise ValueError(f"Could not resolve remote image hostname: {hostname}") from exc
+
+    if not infos:
+        raise ValueError(f"Remote image hostname did not resolve: {hostname}")
+
+    for info in infos:
+        sockaddr = info[4]
+        ip_text = _extract_ip_from_sockaddr(sockaddr)
+        ip_obj = ipaddress.ip_address(ip_text)
+        if not ip_obj.is_global:
+            raise ValueError(f"Remote image URL resolved to a non-public address: {ip_text}")
+
+
+class SafeImageRedirectHandler(request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        validate_remote_image_url(newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 def infer_extension(
@@ -81,8 +132,10 @@ def infer_extension(
 
 
 def fetch_url(url: str, timeout: float) -> tuple[bytes, str | None]:
+    validate_remote_image_url(url)
     req = request.Request(url, method="GET")
-    with request.urlopen(req, timeout=timeout) as resp:
+    opener = request.build_opener(SafeImageRedirectHandler)
+    with opener.open(req, timeout=timeout) as resp:
         data = resp.read()
         return data, resp.headers.get_content_type()
 

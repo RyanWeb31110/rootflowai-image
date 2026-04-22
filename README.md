@@ -134,9 +134,20 @@ python3 scripts/edit_image.py \
   `skills/rootflowai-image-count/SKILL.md`
 - Scripts: `scripts/generate_image.py`, `scripts/edit_image.py`
 
+## Testing
+
+Run the local test suite:
+
+```bash
+python3 -m unittest discover -s tests -p 'test_*.py'
+```
+
+GitHub Actions also runs the same tests on every push and pull request.
+
 ## Notes
 
 - Do not commit API keys into this repository.
 - The scripts use Python standard library modules only.
 - Both scripts print `profile_resolved` and `api_key_source` in their JSON output so you can see which billing path was actually used.
+- Remote image downloads are restricted to public `https://` URLs to reduce SSRF-style risk when an upstream API returns image links.
 - The edit flow in this repo is implemented against the OpenAI-compatible `POST /v1/images/edits` contract. It has not been live-tested against RootFlowAI with a real key and image inside this repo automation session.
