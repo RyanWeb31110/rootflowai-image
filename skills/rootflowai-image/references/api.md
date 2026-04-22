@@ -10,16 +10,35 @@
 
 ## Authentication
 
-The script reads the API key from:
+The scripts support profile-based key management.
+
+Recommended environment variables:
+
+1. `ROOTFLOWAI_METERED_API_KEY`
+2. `ROOTFLOWAI_COUNT_API_KEY`
+
+Backward-compatible alias:
+
+- `ROOTFLOWAI_API_KEY` -> treated as the metered profile key
+
+Priority order:
 
 1. `--api-key`
-2. `ROOTFLOWAI_API_KEY`
+2. profile-specific env var(s)
 
 Optional environment variable:
 
 - `ROOTFLOWAI_BASE_URL`
 
 Use `ROOTFLOWAI_BASE_URL` only when the server base URL is different from the production default.
+
+## Profile Routing
+
+- `--profile auto` is the default
+- `gpt-image-2` resolves to profile `metered`
+- `gpt-image-2-count` resolves to profile `count`
+- `--profile metered` forces the metered key
+- `--profile count` forces the count key
 
 ## Default Generation Request Body
 
@@ -60,6 +79,7 @@ python3 /absolute/path/to/plugins/rootflowai-image/scripts/edit_image.py \
 
 Useful flags:
 
+- `--profile`
 - `--image`
 - `--mask`
 - `--model`
@@ -120,3 +140,4 @@ curl --location 'https://api.rootflowai.com/v1/images/edits' \
 - The script uses Python standard library modules only.
 - Remote URL responses are downloaded and saved locally.
 - File extensions are inferred from content type, magic bytes, or URL path.
+- Script output includes `profile_requested`, `profile_resolved`, and `api_key_source` to help track which key was used.

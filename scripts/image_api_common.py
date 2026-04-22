@@ -14,8 +14,29 @@ from urllib import error, parse, request
 
 DEFAULT_BASE_URL = "https://api.rootflowai.com/v1"
 DEFAULT_MODEL = "gpt-image-2"
+COUNT_MODEL = "gpt-image-2-count"
 DEFAULT_SIZE = "1536x1024"
 DEFAULT_QUALITY = "high"
+DEFAULT_PROFILE = "auto"
+PROFILE_METERED = "metered"
+PROFILE_COUNT = "count"
+PROFILE_AUTO = "auto"
+SUPPORTED_PROFILES = (PROFILE_AUTO, PROFILE_METERED, PROFILE_COUNT)
+
+PROFILE_MODEL_DEFAULTS = {
+    PROFILE_METERED: DEFAULT_MODEL,
+    PROFILE_COUNT: COUNT_MODEL,
+}
+
+MODEL_PROFILE_MAP = {
+    DEFAULT_MODEL: PROFILE_METERED,
+    COUNT_MODEL: PROFILE_COUNT,
+}
+
+PROFILE_ENV_VARS = {
+    PROFILE_METERED: ("ROOTFLOWAI_METERED_API_KEY", "ROOTFLOWAI_API_KEY"),
+    PROFILE_COUNT: ("ROOTFLOWAI_COUNT_API_KEY",),
+}
 
 
 def normalize_base_url(base_url: str) -> str:
@@ -298,8 +319,60 @@ def save_response_images(
     return saved_paths, skipped_items, raw_response_path
 
 
-def get_api_key(explicit_api_key: str | None) -> str:
-    api_key = explicit_api_key or os.environ.get("ROOTFLOWAI_API_KEY")
-    if not api_key:
-        raise SystemExit("Missing API key. Use --api-key or set ROOTFLOWAI_API_KEY.")
-    return api_key
+def add_profile_arguments(parser: Any) -> None:
+    parser.add_argument(
+        "--profile",
+        choices=SUPPORTED_PROFILES,
+        default=DEFAULT_PROFILE,
+        help=(
+            "Credential profile. Use auto to choose by model, metered for usage-based billing, "
+            "or count for the gpt-image-2-count key."
+        ),
+    )
+
+
+def resolve_profile(profile: str, model: str | None) -> str:
+    if profile != PROFILE_AUTO:
+        return profile
+    if model and model in MODEL_PROFILE_MAP:
+        return MODEL_PROFILE_MAP[model]
+    return PROFILE_METERED
+
+
+def resolve_model(profile: str, model: str | None) -> str:
+    if model:
+        return model
+    if profile == PROFILE_AUTO:
+        return DEFAULT_MODEL
+    return PROFILE_MODEL_DEFAULTS.get(profile, DEFAULT_MODEL)
+
+
+def get_api_key(
+    explicit_api_key: str | None,
+    profile: str = PROFILE_AUTO,
+    model: str | None = None,
+) -> tuple[str, str, str]:
+    resolved_profile = resolve_profile(profile, model)
+
+    if explicit_api_key:
+        return explicit_api_key, resolved_profile, "--api-key"
+
+    env_names = PROFILE_ENV_VARS.get(resolved_profile, ())
+    for env_name in env_names:
+        value = os.environ.get(env_name)
+        if value:
+            return value, resolved_profile, env_name
+
+    if resolved_profile == PROFILE_METERED:
+        raise SystemExit(
+            "Missing API key for the metered profile. "
+            "Set ROOTFLOWAI_METERED_API_KEY or the legacy ROOTFLOWAI_API_KEY, or use --api-key."
+        )
+
+    if resolved_profile == PROFILE_COUNT:
+        raise SystemExit(
+            "Missing API key for the count profile. "
+            "Set ROOTFLOWAI_COUNT_API_KEY, or use --api-key."
+        )
+
+    raise SystemExit("Missing API key. Use --api-key or configure the appropriate profile key.")

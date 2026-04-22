@@ -13,8 +13,10 @@ from image_api_common import (
     DEFAULT_MODEL,
     DEFAULT_QUALITY,
     DEFAULT_SIZE,
+    add_profile_arguments,
     get_api_key,
     post_json_request,
+    resolve_model,
     save_response_images,
 )
 
@@ -33,7 +35,8 @@ def build_parser() -> argparse.ArgumentParser:
         default=os.environ.get("ROOTFLOWAI_BASE_URL", DEFAULT_BASE_URL),
         help="API base URL. Defaults to ROOTFLOWAI_BASE_URL or the production URL.",
     )
-    parser.add_argument("--model", default=DEFAULT_MODEL, help="Model name.")
+    parser.add_argument("--model", help=f"Model name. Defaults to {DEFAULT_MODEL}.")
+    add_profile_arguments(parser)
     parser.add_argument("--size", default=DEFAULT_SIZE, help="Requested image size.")
     parser.add_argument("--quality", default=DEFAULT_QUALITY, help="Requested image quality.")
     parser.add_argument("--n", type=int, default=1, help="Number of images to request.")
@@ -64,8 +67,14 @@ def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
 
+    effective_model = resolve_model(args.profile, args.model)
+
     try:
-        api_key = get_api_key(args.api_key)
+        api_key, resolved_profile, api_key_source = get_api_key(
+            args.api_key,
+            profile=args.profile,
+            model=effective_model,
+        )
     except SystemExit as exc:
         parser.error(str(exc))
 
@@ -73,7 +82,7 @@ def main() -> int:
         parser.error("--n must be at least 1.")
 
     request_payload = {
-        "model": args.model,
+        "model": effective_model,
         "prompt": args.prompt,
         "size": args.size,
         "quality": args.quality,
@@ -101,7 +110,10 @@ def main() -> int:
                 "saved": saved_paths,
                 "skipped_items": skipped_items,
                 "response_path": raw_response_path,
-                "model": args.model,
+                "model": effective_model,
+                "profile_requested": args.profile,
+                "profile_resolved": resolved_profile,
+                "api_key_source": api_key_source,
                 "size": args.size,
                 "quality": args.quality,
                 "n_requested": args.n,
