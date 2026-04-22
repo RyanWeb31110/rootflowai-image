@@ -54,6 +54,33 @@ The repository now supports one source tree with multiple installable package ta
 - `cherry-studio`: standalone self-contained skill ZIPs for Cherry Studio "Install from ZIP"
 - `claude-compatible`: standalone self-contained skill ZIPs for `.claude/skills` based hosts
 
+## GitHub Releases
+
+Users do not need to build ZIPs manually if you publish GitHub Releases for the repo.
+
+This repository now includes a release workflow that:
+
+- runs on tag push for tags like `v0.2.0`
+- can also be triggered manually from GitHub Actions
+- rebuilds every installable package
+- uploads all ZIPs plus `package-index.json` to the GitHub Release page
+
+Typical maintainer flow:
+
+```bash
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+After the workflow finishes, users can download the correct installer directly from the Releases page instead of building locally.
+
+Recommended assets for end users:
+
+- Cherry Studio: `rootflowai-image-*-cherry-studio.zip`
+- Codex Skill import: `rootflowai-image-*-codex-skill.zip`
+- Codex Plugin import: `rootflowai-image-codex-plugin.zip`
+- Claude-compatible hosts: `rootflowai-image-*-claude-compatible.zip`
+
 Build all packages locally:
 
 ```bash
