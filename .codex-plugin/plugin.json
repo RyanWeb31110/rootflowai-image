@@ -1,7 +1,7 @@
 {
   "name": "rootflowai-image",
   "version": "0.1.0",
-  "description": "Generate images through the RootFlowAI images API and save them locally.",
+  "description": "Generate and edit images through the RootFlowAI images API and save them locally.",
   "license": "MIT",
   "keywords": [
     "rootflowai",
@@ -12,8 +12,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "RootFlowAI Image",
-    "shortDescription": "Generate images through RootFlowAI",
-    "longDescription": "Create images with the RootFlowAI-compatible images API, using a bundled workflow that handles auth, request formatting, response parsing, and saving files to disk.",
+    "shortDescription": "Generate and edit images through RootFlowAI",
+    "longDescription": "Create and edit images with the RootFlowAI-compatible images API, using bundled workflows that handle auth, request formatting, response parsing, and saving files to disk.",
     "developerName": "Local Workspace",
     "category": "Productivity",
     "capabilities": [
@@ -22,8 +22,8 @@
     ],
     "defaultPrompt": [
       "Generate an image through RootFlowAI with my prompt and save it locally.",
-      "Create two RootFlowAI images in a cinematic style and keep the raw response.",
-      "Use RootFlowAI to iterate on an image prompt and write the files to my workspace."
+      "Edit an existing portrait through RootFlowAI and write the output files to my workspace.",
+      "Create or revise a RootFlowAI image and keep the raw API response for debugging."
     ],
     "brandColor": "#D96B3B",
     "screenshots": []
