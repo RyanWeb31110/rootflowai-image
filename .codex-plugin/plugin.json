@@ -1,0 +1,31 @@
+{
+  "name": "rootflowai-image",
+  "version": "0.1.0",
+  "description": "Generate images through the RootFlowAI images API and save them locally.",
+  "license": "MIT",
+  "keywords": [
+    "rootflowai",
+    "image-generation",
+    "gpt-image-2",
+    "prompt-to-image"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RootFlowAI Image",
+    "shortDescription": "Generate images through RootFlowAI",
+    "longDescription": "Create images with the RootFlowAI-compatible images API, using a bundled workflow that handles auth, request formatting, response parsing, and saving files to disk.",
+    "developerName": "Local Workspace",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Generate an image through RootFlowAI with my prompt and save it locally.",
+      "Create two RootFlowAI images in a cinematic style and keep the raw response.",
+      "Use RootFlowAI to iterate on an image prompt and write the files to my workspace."
+    ],
+    "brandColor": "#D96B3B",
+    "screenshots": []
+  }
+}
