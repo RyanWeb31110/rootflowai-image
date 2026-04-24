@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 
 from image_api_common import (
     DEFAULT_BASE_URL,
@@ -14,10 +15,12 @@ from image_api_common import (
     DEFAULT_QUALITY,
     DEFAULT_SIZE,
     add_profile_arguments,
+    encode_local_image_as_data_uri,
     get_api_key,
     post_json_request,
     resolve_model,
     save_response_images,
+    validate_remote_image_url,
 )
 
 
@@ -26,6 +29,11 @@ def build_parser() -> argparse.ArgumentParser:
         description="Generate images with the RootFlowAI images API and save them to disk."
     )
     parser.add_argument("--prompt", required=True, help="Text prompt for image generation.")
+    parser.add_argument(
+        "--image",
+        action="append",
+        help="Reference image for image-to-image. URL (https) or local file path. Repeat for multiple (up to 16).",
+    )
     parser.add_argument(
         "--api-key",
         help="Bearer token. Overrides profile-based environment variable resolution.",
@@ -57,7 +65,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--timeout",
         type=float,
-        default=180.0,
+        default=900.0,
         help="HTTP timeout in seconds.",
     )
     return parser
@@ -88,6 +96,15 @@ def main() -> int:
         "quality": args.quality,
         "n": args.n,
     }
+    if args.image:
+        image_list = []
+        for img in args.image:
+            if img.startswith("https://"):
+                validate_remote_image_url(img)
+                image_list.append(img)
+            else:
+                image_list.append(encode_local_image_as_data_uri(Path(img)))
+        request_payload["image"] = image_list
     response_payload = post_json_request(
         endpoint="/images/generations",
         api_key=api_key,

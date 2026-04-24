@@ -76,7 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--timeout",
         type=float,
-        default=180.0,
+        default=900.0,
         help="HTTP timeout in seconds.",
     )
     return parser

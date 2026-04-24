@@ -17,6 +17,8 @@ from urllib import error, parse, request
 DEFAULT_BASE_URL = "https://api.rootflowai.com/v1"
 DEFAULT_MODEL = "gpt-image-2"
 COUNT_MODEL = "gpt-image-2-count"
+COUNT_HD_MODEL = "gpt-image-2-hd-count"
+COUNT_4K_MODEL = "gpt-image-2-4k-count"
 DEFAULT_SIZE = "1536x1024"
 DEFAULT_QUALITY = "high"
 DEFAULT_PROFILE = "auto"
@@ -33,6 +35,8 @@ PROFILE_MODEL_DEFAULTS = {
 MODEL_PROFILE_MAP = {
     DEFAULT_MODEL: PROFILE_METERED,
     COUNT_MODEL: PROFILE_COUNT,
+    COUNT_HD_MODEL: PROFILE_COUNT,
+    COUNT_4K_MODEL: PROFILE_COUNT,
 }
 
 PROFILE_ENV_VARS = {
@@ -92,6 +96,16 @@ class SafeImageRedirectHandler(request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         validate_remote_image_url(newurl)
         return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def encode_local_image_as_data_uri(path: Path) -> str:
+    path = path.expanduser().resolve()
+    if not path.is_file():
+        raise ValueError(f"Image file not found: {path}")
+    data = path.read_bytes()
+    mime = mimetypes.guess_type(str(path))[0] or "image/png"
+    b64 = base64.b64encode(data).decode("ascii")
+    return f"data:{mime};base64,{b64}"
 
 
 def infer_extension(
