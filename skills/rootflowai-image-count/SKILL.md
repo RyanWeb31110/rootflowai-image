@@ -18,6 +18,18 @@ It should prefer the `gpt-image-2-count` model and the count credential profile 
 | `gpt-image-2-hd-count` | 2K | All 13 size ratios |
 | `gpt-image-2-4k-count` | 4K | Only `16:9`/`9:16`/`2:1`/`1:2`/`21:9`/`9:21` |
 
+## Quality Control
+
+Use `--quality` to control generation quality:
+
+| Quality | Speed | Use Case |
+|---------|-------|----------|
+| `low` | Fast (30-60s) | Quick preview, draft |
+| `medium` | Medium (40-80s) | Daily use |
+| `high` (default) | Slow (50-120s) | Final output |
+
+**Note**: All quality levels have the same price.
+
 ## Quick Start
 
 1. Use `ROOTFLOWAI_COUNT_API_KEY` for authentication.
@@ -35,6 +47,7 @@ python3 ../../scripts/generate_image.py \
   --model gpt-image-2-count \
   --prompt "Three oath brothers doing a short-video livestream" \
   --size "16:9" \
+  --quality high \
   --output-dir ./out
 ```
 
@@ -47,6 +60,20 @@ python3 ../../scripts/generate_image.py \
   --model gpt-image-2-hd-count \
   --prompt "A cinematic sunset over the ocean" \
   --size "16:9" \
+  --quality high \
+  --output-dir ./out
+```
+
+Quick preview (low quality):
+
+```bash
+ROOTFLOWAI_COUNT_API_KEY=your_count_key_here \
+python3 ../../scripts/generate_image.py \
+  --profile count \
+  --model gpt-image-2-count \
+  --prompt "Product shot on clean background" \
+  --size "1:1" \
+  --quality low \
   --output-dir ./out
 ```
 

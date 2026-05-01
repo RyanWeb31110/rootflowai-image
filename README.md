@@ -191,7 +191,28 @@ python3 scripts/edit_image.py \
 
 ## Common Options
 
+### Quality Control
+
+The `--quality` parameter controls image generation quality with three levels:
+
+| Quality | Speed | Use Case |
+|---------|-------|----------|
+| `low` | Fast (30-60s) | Quick preview, draft |
+| `medium` | Medium (40-80s) | Daily use |
+| `high` (default) | Slow (50-120s) | Final output, high-quality work |
+
+**Note**: All quality levels have the same price; only generation speed and detail differ.
+
+### Examples
+
 ```bash
+# Quick preview with low quality
+python3 scripts/generate_image.py \
+  --prompt 'American-style professional headshot, blue studio background' \
+  --quality low \
+  --output-dir ./out
+
+# Final output with high quality (default)
 python3 scripts/generate_image.py \
   --prompt 'American-style professional headshot, blue studio background' \
   --size 1536x1024 \
@@ -205,6 +226,7 @@ python3 scripts/generate_image.py \
 python3 scripts/generate_image.py \
   --profile count \
   --prompt 'Minimal product ad shot on a clean studio set' \
+  --quality medium \
   --output-dir ./out
 ```
 

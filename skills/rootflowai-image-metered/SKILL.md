@@ -10,6 +10,18 @@ description: Generate or edit images through the RootFlowAI-compatible images AP
 Use this skill for the standard metered RootFlowAI image workflow.
 It should prefer the `gpt-image-2` model and the metered credential profile unless the user explicitly asks for something else.
 
+## Quality Control
+
+Use `--quality` to control generation quality:
+
+| Quality | Speed | Use Case |
+|---------|-------|----------|
+| `low` | Fast (30-60s) | Quick preview, draft |
+| `medium` | Medium (40-80s) | Daily use |
+| `high` (default) | Slow (50-120s) | Final output |
+
+**Note**: All quality levels have the same price.
+
 ## Quick Start
 
 1. Prefer `ROOTFLOWAI_METERED_API_KEY` for authentication.
@@ -26,6 +38,19 @@ python3 ../../scripts/generate_image.py \
   --profile metered \
   --prompt "Three oath brothers doing a short-video livestream" \
   --size "16:9" \
+  --quality high \
+  --output-dir ./out
+```
+
+Quick preview (low quality):
+
+```bash
+ROOTFLOWAI_METERED_API_KEY=your_metered_key_here \
+python3 ../../scripts/generate_image.py \
+  --profile metered \
+  --prompt "Product shot on clean background" \
+  --size "1:1" \
+  --quality low \
   --output-dir ./out
 ```
 
