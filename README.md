@@ -25,7 +25,7 @@ It exposes two explicit billing-lane skills:
 This repo now supports two billing profiles:
 
 - `metered`: for `gpt-image-2`
-- `count`: for `gpt-image-2-count`
+- `count`: for `gpt-image-2-count` and Gemini count image models
 
 Recommended environment variables:
 
@@ -43,6 +43,7 @@ How routing works:
 - `--profile auto` is the default
 - `gpt-image-2` automatically uses the `metered` profile
 - `gpt-image-2-count` automatically uses the `count` profile
+- `gemini-*-image-*-count` models automatically use the `count` profile
 - you can override routing explicitly with `--profile metered` or `--profile count`
 
 ## Distribution Targets
@@ -180,6 +181,28 @@ python3 scripts/generate_image.py \
   --output-dir ./out
 ```
 
+Generate a Gemini image with count billing:
+
+```bash
+python3 scripts/generate_image.py \
+  --profile count \
+  --model gemini-3.1-flash-image-count \
+  --prompt 'A clean product hero image for a black ceramic coffee cup' \
+  --size 1:1 \
+  --output-dir ./out
+```
+
+Generate a 4K Gemini image:
+
+```bash
+python3 scripts/generate_image.py \
+  --profile count \
+  --model gemini-3-pro-image-4k-count \
+  --prompt 'A premium watch campaign poster, studio lighting, crisp detail' \
+  --size 1:1 \
+  --output-dir ./out
+```
+
 Edit an existing image:
 
 ```bash
@@ -202,6 +225,26 @@ The `--quality` parameter controls image generation quality with three levels:
 | `high` (default) | Slow (50-120s) | Final output, high-quality work |
 
 **Note**: All quality levels have the same price; only generation speed and detail differ.
+
+Gemini models do not use `--quality`. The scripts automatically leave that field out when the model starts with `gemini-`.
+
+### Count-Billed Models
+
+| Model | Resolution | Good For |
+|-------|------------|----------|
+| `gpt-image-2-count` | 1K | Default GPT image generation |
+| `gpt-image-2-hd-count` | 2K | Sharper GPT image output |
+| `gpt-image-2-4k-count` | 4K | Large GPT posters and banners |
+| `gemini-2.5-flash-image-count` | 1K | Lowest-cost Gemini drafts |
+| `gemini-3.1-flash-image-count` | 1K | Gemini 3.1 Flash standard images |
+| `gemini-3.1-flash-image-hd-count` | 2K | Gemini 3.1 Flash HD |
+| `gemini-3.1-flash-image-4k-count` | 4K | Gemini 3.1 Flash 4K |
+| `gemini-3-pro-image-count` | 1K | Gemini 3 Pro standard images |
+| `gemini-3-pro-image-hd-count` | 2K | Gemini 3 Pro HD |
+| `gemini-3-pro-image-4k-count` | 4K | Gemini 3 Pro 4K |
+
+Use GPT-Image-2 when you want the default RootFlowAI image lane and quality controls.
+Use Gemini when you want Gemini/Nano Banana behavior, stronger prompt following, or consistent character/style references.
 
 ### Examples
 

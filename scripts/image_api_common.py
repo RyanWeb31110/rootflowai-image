@@ -19,6 +19,13 @@ DEFAULT_MODEL = "gpt-image-2"
 COUNT_MODEL = "gpt-image-2-count"
 COUNT_HD_MODEL = "gpt-image-2-hd-count"
 COUNT_4K_MODEL = "gpt-image-2-4k-count"
+GEMINI_25_FLASH_MODEL = "gemini-2.5-flash-image-count"
+GEMINI_31_FLASH_MODEL = "gemini-3.1-flash-image-count"
+GEMINI_31_FLASH_HD_MODEL = "gemini-3.1-flash-image-hd-count"
+GEMINI_31_FLASH_4K_MODEL = "gemini-3.1-flash-image-4k-count"
+GEMINI_3_PRO_MODEL = "gemini-3-pro-image-count"
+GEMINI_3_PRO_HD_MODEL = "gemini-3-pro-image-hd-count"
+GEMINI_3_PRO_4K_MODEL = "gemini-3-pro-image-4k-count"
 DEFAULT_SIZE = "1536x1024"
 DEFAULT_QUALITY = "high"
 DEFAULT_PROFILE = "auto"
@@ -32,11 +39,22 @@ PROFILE_MODEL_DEFAULTS = {
     PROFILE_COUNT: COUNT_MODEL,
 }
 
+GEMINI_COUNT_MODELS = (
+    GEMINI_25_FLASH_MODEL,
+    GEMINI_31_FLASH_MODEL,
+    GEMINI_31_FLASH_HD_MODEL,
+    GEMINI_31_FLASH_4K_MODEL,
+    GEMINI_3_PRO_MODEL,
+    GEMINI_3_PRO_HD_MODEL,
+    GEMINI_3_PRO_4K_MODEL,
+)
+
 MODEL_PROFILE_MAP = {
     DEFAULT_MODEL: PROFILE_METERED,
     COUNT_MODEL: PROFILE_COUNT,
     COUNT_HD_MODEL: PROFILE_COUNT,
     COUNT_4K_MODEL: PROFILE_COUNT,
+    **{model: PROFILE_COUNT for model in GEMINI_COUNT_MODELS},
 }
 
 PROFILE_ENV_VARS = {
@@ -412,6 +430,10 @@ def resolve_model(profile: str, model: str | None) -> str:
     if profile == PROFILE_AUTO:
         return DEFAULT_MODEL
     return PROFILE_MODEL_DEFAULTS.get(profile, DEFAULT_MODEL)
+
+
+def model_supports_quality(model: str) -> bool:
+    return model not in GEMINI_COUNT_MODELS
 
 
 def get_api_key(

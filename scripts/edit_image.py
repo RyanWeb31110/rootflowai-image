@@ -16,6 +16,7 @@ from image_api_common import (
     DEFAULT_SIZE,
     add_profile_arguments,
     get_api_key,
+    model_supports_quality,
     post_multipart_request,
     resolve_model,
     save_response_images,
@@ -115,9 +116,10 @@ def main() -> int:
         ("model", effective_model),
         ("prompt", args.prompt),
         ("size", args.size),
-        ("quality", args.quality),
         ("n", str(args.n)),
     ]
+    if model_supports_quality(effective_model):
+        fields.append(("quality", args.quality))
     if args.background:
         fields.append(("background", args.background))
     if args.input_fidelity:

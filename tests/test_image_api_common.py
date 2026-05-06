@@ -71,6 +71,18 @@ class ProfileRoutingTests(unittest.TestCase):
             image_api_common.COUNT_MODEL,
         )
 
+    def test_gemini_count_models_use_count_profile(self) -> None:
+        for model in image_api_common.GEMINI_COUNT_MODELS:
+            with self.subTest(model=model):
+                self.assertEqual(
+                    image_api_common.resolve_profile(image_api_common.PROFILE_AUTO, model),
+                    image_api_common.PROFILE_COUNT,
+                )
+
+    def test_gemini_count_models_do_not_use_quality_parameter(self) -> None:
+        self.assertFalse(image_api_common.model_supports_quality(image_api_common.GEMINI_31_FLASH_MODEL))
+        self.assertTrue(image_api_common.model_supports_quality(image_api_common.COUNT_MODEL))
+
     def test_get_api_key_uses_profile_specific_env_var(self) -> None:
         with mock.patch.dict(os.environ, {"ROOTFLOWAI_COUNT_API_KEY": "count-demo"}, clear=True):
             key, profile, source = image_api_common.get_api_key(

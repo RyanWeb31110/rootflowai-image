@@ -17,6 +17,7 @@ from image_api_common import (
     add_profile_arguments,
     encode_local_image_as_data_uri,
     get_api_key,
+    model_supports_quality,
     post_json_request,
     resolve_model,
     save_response_images,
@@ -93,9 +94,10 @@ def main() -> int:
         "model": effective_model,
         "prompt": args.prompt,
         "size": args.size,
-        "quality": args.quality,
         "n": args.n,
     }
+    if model_supports_quality(effective_model):
+        request_payload["quality"] = args.quality
     if args.image:
         image_list = []
         for img in args.image:

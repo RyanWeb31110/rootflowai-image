@@ -1,6 +1,6 @@
 ---
 name: rootflowai-image-count
-description: Generate or edit images through the RootFlowAI-compatible images API using the count-billed lane. Supports 1K/2K/4K resolution tiers and image-to-image. Use this skill when the user wants the `gpt-image-2-count` model, the count API key, or a separate per-request billing workflow.
+description: Generate or edit images through the RootFlowAI-compatible images API using the count-billed lane. Supports GPT-Image-2 and Gemini image count models, 1K/2K/4K resolution tiers, and image-to-image. Use this skill when the user wants `gpt-image-2-count`, Gemini image count models, the count API key, or a separate per-request billing workflow.
 ---
 
 # RootFlowAI Image Count
@@ -8,15 +8,26 @@ description: Generate or edit images through the RootFlowAI-compatible images AP
 ## Overview
 
 Use this skill for the count-billed RootFlowAI image workflow.
-It should prefer the `gpt-image-2-count` model and the count credential profile unless the user explicitly asks for something else.
+It should prefer the `gpt-image-2-count` model and the count credential profile unless the user asks for Gemini or another explicit count model.
 
 ## Models
 
 | Model | Resolution | Notes |
-|-------|-----------|-------|
+|-------|------------|-------|
 | `gpt-image-2-count` | 1K (default) | All 13 size ratios |
 | `gpt-image-2-hd-count` | 2K | All 13 size ratios |
 | `gpt-image-2-4k-count` | 4K | Only `16:9`/`9:16`/`2:1`/`1:2`/`21:9`/`9:21` |
+| `gemini-2.5-flash-image-count` | 1K | Lowest-cost Gemini image model |
+| `gemini-3.1-flash-image-count` | 1K | Gemini 3.1 Flash standard |
+| `gemini-3.1-flash-image-hd-count` | 2K | Gemini 3.1 Flash HD |
+| `gemini-3.1-flash-image-4k-count` | 4K | Gemini 3.1 Flash 4K |
+| `gemini-3-pro-image-count` | 1K | Gemini 3 Pro standard |
+| `gemini-3-pro-image-hd-count` | 2K | Gemini 3 Pro HD |
+| `gemini-3-pro-image-4k-count` | 4K | Gemini 3 Pro 4K |
+
+Use GPT-Image-2 when the user wants the default RootFlowAI image style or asks for `quality`.
+Use Gemini when the user asks for Gemini/Nano Banana, stronger prompt following, character/style consistency, or explicit Gemini model names.
+Gemini models do not use `--quality`; the scripts omit that parameter automatically.
 
 ## Quality Control
 
@@ -37,6 +48,7 @@ Use `--quality` to control generation quality:
 3. Use `edit_image.py` for image editing work (multipart upload).
 4. Pass `--profile count` so the billing route stays explicit.
 5. Prefer `gpt-image-2-count` as the default model; use `gpt-image-2-hd-count` for 2K or `gpt-image-2-4k-count` for 4K.
+6. For Gemini, choose the explicit Gemini count model. Do not invent 2K/4K variants for `gemini-2.5-flash-image-count`; use Gemini 3.1 Flash or Gemini 3 Pro for HD/4K.
 
 Text-to-image:
 
@@ -74,6 +86,30 @@ python3 ../../scripts/generate_image.py \
   --prompt "Product shot on clean background" \
   --size "1:1" \
   --quality low \
+  --output-dir ./out
+```
+
+Gemini text-to-image:
+
+```bash
+ROOTFLOWAI_COUNT_API_KEY=your_count_key_here \
+python3 ../../scripts/generate_image.py \
+  --profile count \
+  --model gemini-3.1-flash-image-count \
+  --prompt "A clean product hero image for a black ceramic coffee cup" \
+  --size "1:1" \
+  --output-dir ./out
+```
+
+Gemini 4K:
+
+```bash
+ROOTFLOWAI_COUNT_API_KEY=your_count_key_here \
+python3 ../../scripts/generate_image.py \
+  --profile count \
+  --model gemini-3-pro-image-4k-count \
+  --prompt "A premium watch campaign poster, studio lighting, crisp detail" \
+  --size "1:1" \
   --output-dir ./out
 ```
 
@@ -122,6 +158,8 @@ Pixel formats (e.g. `1024x1024`) are also accepted and auto-converted to the nea
 - In the source repository and Codex plugin layout, prefer `../../scripts/edit_image.py --profile count --model gpt-image-2-count`.
 - For image-to-image, use `generate_image.py` with `--image` (URL or local path). Repeat `--image` for multiple reference images (up to 16).
 - Keep the model on `gpt-image-2-count` unless the user explicitly asks for HD or 4K.
+- If the user asks for Gemini image generation, use one of the Gemini count models above and still pass `--profile count`.
+- For Gemini image-to-image, keep reference images to 14 or fewer.
 - Always pass `--output-dir` unless the user explicitly wants files in the current directory.
 - Use `--response-path` when the user wants the raw API payload preserved for debugging.
 - Use `--mask` with `edit_image.py` when the user wants a localized edit and already has a mask image.

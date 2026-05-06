@@ -8,6 +8,10 @@ Use this skill when you want the count-billed workflow.
 - preferred model: `gpt-image-2-count`
 - HD model: `gpt-image-2-hd-count` (2K)
 - 4K model: `gpt-image-2-4k-count` (4K, limited size ratios)
+- Gemini models:
+  - `gemini-2.5-flash-image-count` (1K)
+  - `gemini-3.1-flash-image-count` / `gemini-3.1-flash-image-hd-count` / `gemini-3.1-flash-image-4k-count`
+  - `gemini-3-pro-image-count` / `gemini-3-pro-image-hd-count` / `gemini-3-pro-image-4k-count`
 - preferred env var: `ROOTFLOWAI_COUNT_API_KEY`
 
 ## Environment
@@ -46,6 +50,31 @@ python3 ../../scripts/generate_image.py \
   --model gpt-image-2-count \
   --prompt "Convert this into watercolor style" \
   --image https://example.com/photo.png \
+  --size "1:1" \
+  --output-dir ./out
+```
+
+## Generate (Gemini)
+
+Use Gemini when the user asks for Gemini/Nano Banana, character consistency, style consistency, or an explicit Gemini model.
+Still use the count profile and `ROOTFLOWAI_COUNT_API_KEY`.
+
+```bash
+python3 ../../scripts/generate_image.py \
+  --profile count \
+  --model gemini-3.1-flash-image-count \
+  --prompt "A clean product hero image for a black ceramic coffee cup" \
+  --size "1:1" \
+  --output-dir ./out
+```
+
+Gemini 4K:
+
+```bash
+python3 ../../scripts/generate_image.py \
+  --profile count \
+  --model gemini-3-pro-image-4k-count \
+  --prompt "A premium watch campaign poster, studio lighting, crisp detail" \
   --size "1:1" \
   --output-dir ./out
 ```
@@ -93,5 +122,8 @@ Pixel formats (e.g. `1024x1024`) are also accepted and auto-converted.
 
 - `--api-key` overrides env-based profile resolution.
 - `--image` in `generate_image.py` accepts URLs (https) or local file paths. Local files are sent as base64 data URIs.
+- Gemini count models automatically use the count profile in `--profile auto`.
+- Gemini models do not use `quality`; the scripts omit that parameter for Gemini requests.
+- `gemini-2.5-flash-image-count` is 1K only. Use Gemini 3.1 Flash or Gemini 3 Pro for 2K/4K.
 - Script output includes `profile_requested`, `profile_resolved`, and `api_key_source`.
 - Installed skill ZIPs bundle the runtime scripts inside the skill; the source repository and plugin layout keep the canonical runtime files in the top-level `scripts/` directory.

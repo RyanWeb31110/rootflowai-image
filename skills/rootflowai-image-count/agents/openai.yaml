@@ -1,6 +1,6 @@
 interface:
   display_name: "RootFlowAI Image Count"
-  short_description: "Use RootFlowAI with count billing"
-  default_prompt: "Use $rootflowai-image-count to generate or edit images through the count-billed RootFlowAI workflow."
+  short_description: "Use RootFlowAI GPT and Gemini image models with count billing"
+  default_prompt: "Use $rootflowai-image-count to generate or edit images through the count-billed RootFlowAI GPT/Gemini image workflow."
 policy:
   allow_implicit_invocation: true
